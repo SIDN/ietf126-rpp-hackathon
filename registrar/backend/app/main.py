@@ -11,7 +11,7 @@ from app.api.routes import router as registrar_router
 from app.api.transfer_routes import router as transfer_router
 from app.core.config import settings
 from app.core.logging_config import configure_logging
-from app import registry_client
+from app import registry_client, signing
 
 configure_logging()
 logger = logging.getLogger("registrar.access")
@@ -51,16 +51,18 @@ app.include_router(transfer_router, prefix=settings.api_prefix)
 
 @app.on_event("startup")
 async def register_with_registry() -> None:
-    """Self-register this registrar's directory entry (transfer authorize
-    + complete URLs) with the registry, so it can broker cross-registrar
-    transfer-authorization redirects. Best-effort: if the registry isn't
-    up yet, just log a warning rather than failing to start.
+    """Self-register this registrar's directory entry (its transfer
+    authorize URL and public key) with the registry, so other registrars
+    can look up where to send a domain owner to authorize a transfer, and
+    the registry can verify the signed transfer assertions this registrar
+    issues. Best-effort: if the registry isn't up yet, just log a warning
+    rather than failing to start.
     """
     try:
         await registry_client.register_registrar(
             settings.registrar_name,
             settings.transfer_authorize_url,
-            settings.transfer_complete_url,
+            signing.public_key_pem(),
         )
         logger.info("Registered with registry directory as '%s'", settings.registrar_name)
     except Exception as exc:  # noqa: BLE001 - best-effort, non-fatal

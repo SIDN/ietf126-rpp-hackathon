@@ -86,8 +86,8 @@ function App() {
   return (
     <div className="page">
       <header className="page-header">
-        <h1>Registry</h1>
-        <p>A simple registry of named entries, backed by a FastAPI service.</p>
+        <h1>My Registry</h1>
+        <p>A simple domain name registry</p>
       </header>
 
       <main className="layout">

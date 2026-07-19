@@ -65,12 +65,5 @@ class Settings(BaseSettings):
         processed."""
         return f"{self.public_base_url}{self.api_prefix}/transfer/complete"
 
-    @property
-    def registry_transfer_callback_url(self) -> str:
-        """The registry's fixed transfer callback - the losing registrar
-        always redirects here, regardless of which registrar started the
-        transfer."""
-        return f"{self.registry_api_url}/transfer/callback"
-
 
 settings = Settings()

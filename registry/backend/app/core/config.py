@@ -14,5 +14,9 @@ class Settings(BaseSettings):
     class Config:
         env_prefix = "REGISTRY_"
 
+    # Logging verbosity (DEBUG, INFO, WARNING, ...). Set to DEBUG to see
+    # every URL the registrar backend requests, in or out.
+    log_level: str = "INFO"
+
 
 settings = Settings()

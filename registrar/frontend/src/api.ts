@@ -39,13 +39,13 @@ export const api = {
    * on a pending transfer-authorization consent screen. Navigate the
    * browser here directly - do not `fetch()` it. */
   transferDecisionUrl: (
-    consent: { domain: string; registrar: string; state: string },
+    consent: { domain: string; registrar: string; returnUrl: string },
     approved: boolean,
   ) =>
     `${API_BASE}/transfer/decision?${new URLSearchParams({
       domain: consent.domain,
       registrar: consent.registrar,
-      state: consent.state,
+      return_url: consent.returnUrl,
       approved: String(approved),
     })}`,
 };

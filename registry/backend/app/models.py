@@ -71,13 +71,18 @@ class DomainTransferRequest(BaseModel):
 class Registrar(BaseModel):
     """Directory entry for a registrar portal instance.
 
-    Registrars self-register this on startup so the registry can broker
-    cross-registrar transfer-authorization redirects: when a losing
-    registrar redirects to the registry's fixed transfer callback, the
-    registry looks up the requesting (gaining) registrar's own
-    `callback_url` here and sends the browser back there.
+    Registrars self-register this on startup so other registrars can look
+    up where to send a domain owner to authorize a cross-registrar
+    transfer (`authorize_url`), and so the registry can verify the signed
+    transfer assertions they issue (`public_key`). The losing registrar
+    redirects the browser directly back to the gaining registrar
+    afterwards, using the `return_url` the gaining registrar supplied in
+    its request - the registry is only used as a directory lookup here,
+    not as a redirect broker.
     """
 
     name: str = Field(..., min_length=1, max_length=200)
     authorize_url: str = Field(..., min_length=1, max_length=500)
-    callback_url: str = Field(..., min_length=1, max_length=500)
+    public_key: str = Field(
+        ..., min_length=1, max_length=4000, description="PEM-encoded RSA public key"
+    )

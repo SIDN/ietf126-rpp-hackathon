@@ -18,7 +18,7 @@ function App() {
   const [pullError, setPullError] = useState<string | null>(null);
 
   const [consent, setConsent] = useState<
-    { domain: string; registrar: string; state: string } | null
+    { domain: string; registrar: string; returnUrl: string } | null
   >(null);
 
   const [revealingDomain, setRevealingDomain] = useState<string | null>(null);
@@ -60,14 +60,14 @@ function App() {
     // consent screen before approving/cancelling a pending transfer.
     const consentDomain = params.get("domain");
     const consentRegistrar = params.get("registrar");
-    const consentState = params.get("state");
+    const consentReturnUrl = params.get("return_url");
     if (
       params.get("transfer_consent") === "1" &&
       consentDomain &&
       consentRegistrar &&
-      consentState
+      consentReturnUrl
     ) {
-      setConsent({ domain: consentDomain, registrar: consentRegistrar, state: consentState });
+      setConsent({ domain: consentDomain, registrar: consentRegistrar, returnUrl: consentReturnUrl });
       window.history.replaceState({}, "", window.location.pathname);
       return;
     }

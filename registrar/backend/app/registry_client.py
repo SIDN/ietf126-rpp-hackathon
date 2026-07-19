@@ -51,11 +51,19 @@ async def get_auth_info(domain_name: str) -> dict:
 
 
 async def transfer_domain(
-    domain_name: str, gaining_registrar: str, transfer_token: str
+    domain_name: str,
+    gaining_registrar: str,
+    transfer_token: str,
+    transfer_assertion: str,
 ) -> dict:
+    """Complete a pull transfer. `transfer_assertion` is the base64url-
+    encoded, RS256-signed JWT the losing registrar returned, proving it
+    authorized this exact operation/domain - the registry verifies it
+    against that registrar's registered public key."""
     async with new_client(base_url=settings.registry_api_url) as client:
         response = await client.post(
             f"/domains/{domain_name}/transfer",
+            params={"transfer_assertion": transfer_assertion},
             json={
                 "gaining_registrar": gaining_registrar,
                 "transfer_token": transfer_token,
@@ -77,12 +85,14 @@ async def get_registrar(registrar_name: str) -> dict:
     return response.json()
 
 
-async def register_registrar(name: str, authorize_url: str, callback_url: str) -> dict:
-    """Self-register this registrar's directory entry with the registry."""
+async def register_registrar(name: str, authorize_url: str, public_key: str) -> dict:
+    """Self-register this registrar's directory entry with the registry,
+    including the public key other parties can use to verify transfer
+    assertions this registrar signs."""
     async with new_client(base_url=settings.registry_api_url) as client:
         response = await client.post(
             "/registrars/register",
-            json={"name": name, "authorize_url": authorize_url, "callback_url": callback_url},
+            json={"name": name, "authorize_url": authorize_url, "public_key": public_key},
         )
     _raise_for_error(response)
     return response.json()

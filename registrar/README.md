@@ -61,40 +61,44 @@ a non-default port.
 
 Transfers use a **cross-registrar authorization-redirect flow**, similar in
 spirit to OAuth2 Rich Authorization Requests (RFC 9396): the browser is
-bounced between the gaining registrar, the losing registrar and the
-registry, and each hop only ever needs to know one fixed URL - nobody needs
-to be manually handed a token out-of-band.
+bounced directly between the gaining and losing registrar, authenticated
+by a signed assertion rather than a manually-shared token.
 
 1. Each registrar portal instance self-registers a directory entry with the
    registry on startup (`POST /api/registrars/register`): its name plus its
-   own `authorize_url` and `callback_url`. The registry stores this so it
-   can broker redirects between registrars later.
+   own `authorize_url`. The registry only acts as a lookup directory here -
+   it is never involved in relaying the transfer result.
 2. To gain a domain, a signed-in user enters the domain name and clicks
    "Start transfer". This navigates the browser (not a fetch call) to this
    registrar's `GET /api/transfer/start?domain=...`.
 3. That endpoint looks up the domain's current (losing) registrar from the
    registry, then looks up *that* registrar's `authorize_url` from the
-   registry's directory, and redirects the browser there with an
-   `authorization_details` query parameter - a base64url-encoded JSON
-   object naming the domain, e.g. `{"domain": "example.org"}` - plus its
-   own name (`registrar=`) and a correlation `state`.
+   registry's directory, and redirects the browser there with:
+   - `authorization_details` - a base64url-encoded JSON object naming the
+     domain, e.g. `{"domain": "example.org"}`
+   - `registrar` - this (gaining) registrar's name
+   - `return_url` - this registrar's own `GET /api/transfer/complete` URL,
+     with a correlation `state` baked in, telling the losing registrar
+     exactly where to redirect once it's done
 4. The losing registrar's `GET /api/transfer/authorize` endpoint requires
    the domain's current sponsor to be logged in (redirecting through
    `/auth/login` first if needed, then resuming here). Once authenticated,
-   it decodes `authorization_details`, confirms it really sponsors that
-   domain, and fetches the domain's transfer token from the registry.
-5. The losing registrar then **always** redirects to one fixed URL on the
-   registry (`GET /api/transfer/callback`) - it never talks to the gaining
-   registrar directly, and never needs to know its callback URL.
-6. The registry looks up the gaining registrar (from the `registrar=` query
-   param) in its directory and redirects the browser to *that* registrar's
-   own `callback_url`.
-7. The gaining registrar's `GET /api/transfer/complete` endpoint receives
-   the brokered result, checks it against the `state` it remembered in
-   step 3, and - if authorized - calls the registry's
-   `POST /api/domains/{name}/transfer` with the transfer token to actually
-   complete the pull transfer, then redirects back to its frontend with a
-   success/error message.
+   it decodes `authorization_details` and shows a consent screen naming
+   the domain and requesting registrar.
+5. On approval, `GET /api/transfer/decision` confirms this registrar really
+   sponsors the domain, fetches its transfer token from the registry, and
+   builds a **signed assertion**: an HS256 JWT containing
+   `{"operation": "write:transfer", "domain": "..."}`, signed with a secret
+   shared between registrar instances (`TRANSFER_SIGNING_SECRET`). It then
+   redirects the browser **directly** to the `return_url` it was given,
+   appending `transfer_assertion` and `transfer_token` - the registry is
+   never involved in this handoff.
+6. The gaining registrar's `GET /api/transfer/complete` endpoint verifies
+   the assertion's signature and that its `operation`/`domain` claims match
+   the pending request (correlated via `state`), then - if valid - calls
+   the registry's `POST /api/domains/{name}/transfer` with the transfer
+   token to actually complete the pull transfer, and redirects back to its
+   frontend with a success/error message.
 
 Starting a transfer additionally requires being logged in via OAuth2 (see
 below) at both ends: once at the gaining registrar (to start the transfer)
@@ -223,11 +227,16 @@ uvicorn app.main:app --reload --port 8001
   browser to the domain's current registrar to start a transfer (requires
   an active login session)
 - `GET /api/transfer/authorize` — losing side: the redirect target other
-  registrars send the browser to; requires an active login session,
-  always redirects on to the registry's fixed `/api/transfer/callback`
-- `GET /api/transfer/complete` — gaining side: fixed callback the registry
-  redirects back to once a transfer has been authorized; completes the
-  actual pull transfer and redirects to the frontend
+  registrars send the browser to; requires an active login session, shows
+  a consent screen naming the domain and requesting registrar
+- `GET /api/transfer/decision` — losing side: the domain owner's
+  approve/cancel decision; on approval, redirects directly to the
+  `return_url` supplied by the gaining registrar with a signed
+  `transfer_assertion` (HS256 JWT) and `transfer_token`
+- `GET /api/transfer/complete` — gaining side: its own fixed callback URL
+  (passed as `return_url` when starting the transfer); verifies the signed
+  assertion, completes the actual pull transfer, and redirects to the
+  frontend
 
 ### Simulating a second registrar
 
