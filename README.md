@@ -4,6 +4,10 @@
 
 ![Screenshot of Approving domain transfer - Domain Registrar](/static/acme-transfer-approve.png)
 
+## Overview
+
+This is a small full-stack app with a FastAPI backend and a React + TypeScript (Vite) web UI. It implements a simple domain registry and two registrars, which can transfer domains between each other using OAuth2 authentication.
+
 ## OAuth2 Provider
 
 This project uses Authentik as an OAuth2 provider for the registrars. The Authentik instance is configured to run on `localhost:9991` for registrar A and `localhost:9993` for registrar B.
