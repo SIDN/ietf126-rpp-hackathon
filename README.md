@@ -1,5 +1,9 @@
 # ietf126-rpp-hackathon
 
+![Screenshot of ACME - Domain Registry](/static/acme-registry.png)
+
+![Screenshot of Approving domain transfer - Domain Registrar](/static/acme-transfer-approve.png)
+
 ## OAuth2 Provider
 
 This project uses Authentik as an OAuth2 provider for the registrars. The Authentik instance is configured to run on `localhost:9991` for registrar A and `localhost:9993` for registrar B.
