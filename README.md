@@ -1,14 +1,12 @@
-# ietf126-rpp-hackathon
-
-![Screenshot of ACME - Domain Registry](/static/acme-registry.png)
-
-![Screenshot of Approving domain transfer - Domain Registrar](/static/acme-transfer-approve.png)
-
-## Overview
+# ACME - Domain Registry and Registrar Secure Transfer Demo
 
 This is a small full-stack app with a FastAPI backend and a React + TypeScript (Vite) web UI. It implements a simple domain registry and two registrars, which can transfer domains between each other using OAuth2 authentication.
 
 It is meant to be a hackathon demo for the IETF 126 RPP working group, to demonstrate how a domain registry and registrars can interact using OAuth2 and a pull transfer model.
+
+![Screenshot of ACME - Domain Registry](/static/acme-registry.png)
+
+![Screenshot of Approving domain transfer - Domain Registrar](/static/acme-transfer-approve.png)
 
 ## OAuth2 Provider
 
