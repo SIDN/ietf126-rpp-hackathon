@@ -8,6 +8,8 @@
 
 This is a small full-stack app with a FastAPI backend and a React + TypeScript (Vite) web UI. It implements a simple domain registry and two registrars, which can transfer domains between each other using OAuth2 authentication.
 
+It is meant to be a hackathon demo for the IETF 126 RPP working group, to demonstrate how a domain registry and registrars can interact using OAuth2 and a pull transfer model.
+
 ## OAuth2 Provider
 
 This project uses Authentik as an OAuth2 provider for the registrars. The Authentik instance is configured to run on `localhost:9991` for registrar A and `localhost:9993` for registrar B.
