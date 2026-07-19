@@ -67,3 +67,7 @@ Does authentication for registrar B
 cd registrar/oauth2b/
 docker compose up -d
 ```
+
+## TODO
+
+- [ ] Add OAuth2 security to the registry API endpoints
