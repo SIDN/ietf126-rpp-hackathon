@@ -17,7 +17,7 @@ registry/
 ├── frontend/         React + TypeScript + Vite web UI
 │   └── src/
 │       ├── api.ts     Typed client for the backend API
-│       └── App.tsx    Main UI (list/add/delete entries)
+│       └── App.tsx    Main UI (add/list domains)
 └── start.sh          Starts backend + frontend together
 ```
 
@@ -51,7 +51,6 @@ uvicorn app.main:app --reload --port 8000
 - API base URL: `http://localhost:8000/api`
 - Interactive docs: `http://localhost:8000/docs`
 - Health check: `GET /api/health`
-- Entries CRUD: `GET/POST /api/entries`, `GET/PATCH/DELETE /api/entries/{id}`
 - Domains: `GET/POST /api/domains`, `GET /api/domains/{name}` — tracks which
   registrar currently sponsors each domain name.
 - Transfers use a **pull model with a transfer token**, similar to real
@@ -84,4 +83,4 @@ npm run dev
 - Web UI: `http://localhost:5173`
 - Configure the API URL via `frontend/.env` (`VITE_API_URL`, defaults to `http://localhost:8000/api`)
 
-Run the backend first (or alongside) so the UI can load and manage entries.
+Run the backend first (or alongside) so the UI can load and manage domains.

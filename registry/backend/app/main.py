@@ -8,7 +8,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.domains import router as domains_router
 from app.api.registrars import router as registrars_router
-from app.api.routes import router as entries_router
 from app.core.config import settings
 from app.models import DomainCreate
 from app.store import DomainAlreadyExistsError, domain_store
@@ -43,7 +42,6 @@ async def log_requests(request: Request, call_next):
     )
     return response
 
-app.include_router(entries_router, prefix=settings.api_prefix)
 app.include_router(domains_router, prefix=settings.api_prefix)
 app.include_router(registrars_router, prefix=settings.api_prefix)
 
@@ -52,8 +50,12 @@ app.include_router(registrars_router, prefix=settings.api_prefix)
 def seed_demo_domains() -> None:
     """Seed a couple of demo domains so the transfer flow can be tried out."""
     demo_domains = [
-        DomainCreate(name="example.com", registrar="Registrar A"),
-        DomainCreate(name="example.org", registrar="Registrar B"),
+        DomainCreate(name="coyote1.example", registrar="Registrar A"),
+        DomainCreate(name="coyote2.example", registrar="Registrar A"),
+        DomainCreate(name="coyote3.example", registrar="Registrar A"),
+        DomainCreate(name="roadrunner1.example", registrar="Registrar B"),
+        DomainCreate(name="roadrunner2.example", registrar="Registrar B"),
+        DomainCreate(name="roadrunner3.example", registrar="Registrar B"),
     ]
     for domain in demo_domains:
         try:

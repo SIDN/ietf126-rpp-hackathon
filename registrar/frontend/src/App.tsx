@@ -27,6 +27,8 @@ function App() {
   );
   const [revealError, setRevealError] = useState<string | null>(null);
 
+  const [copiedDomain, setCopiedDomain] = useState<string | null>(null);
+
   const loadDomains = async () => {
     setLoading(true);
     setError(null);
@@ -136,6 +138,19 @@ function App() {
     window.location.href = api.transferDecisionUrl(consent, false);
   };
 
+  const handleCopyDomain = async (domainName: string) => {
+    try {
+      await navigator.clipboard.writeText(domainName);
+      setCopiedDomain(domainName);
+      setTimeout(() => {
+        setCopiedDomain((current) => (current === domainName ? null : current));
+      }, 1500);
+    } catch {
+      // Clipboard access can fail (e.g. insecure context or denied
+      // permission) - just silently ignore, there's no destructive effect.
+    }
+  };
+
   return (
     <div className="page">
       <header className="page-header">
@@ -188,7 +203,7 @@ function App() {
       ) : (
       <main className="layout">
         <section className="panel">
-          <h2>Pull a domain</h2>
+          <h2>Transfer a domain</h2>
           <p className="panel-subtitle">
             Transfer a domain away from its current registrar to{" "}
             {registrarName ?? "this registrar"}. You'll be redirected to sign
@@ -252,7 +267,24 @@ function App() {
               {domains.map((domain) => (
                 <li key={domain.name} className="entry-card">
                   <div className="entry-card-header">
-                    <h3>{domain.name}</h3>
+                    <h3
+                      className="copyable-domain"
+                      role="button"
+                      tabIndex={0}
+                      title="Click to copy domain name"
+                      onClick={() => handleCopyDomain(domain.name)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          handleCopyDomain(domain.name);
+                        }
+                      }}
+                    >
+                      {domain.name}
+                      {copiedDomain === domain.name && (
+                        <span className="copied-badge">Copied!</span>
+                      )}
+                    </h3>
                     <button
                       type="button"
                       className="ghost"
@@ -261,7 +293,7 @@ function App() {
                     >
                       {revealingDomain === domain.name
                         ? "Revealing..."
-                        : "Reveal transfer token"}
+                        : "Reveal token"}
                     </button>
                   </div>
                   <p>Sponsoring registrar: {domain.registrar}</p>

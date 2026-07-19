@@ -1,31 +1,8 @@
 """Pydantic models (schemas) for the registry API."""
 
 from datetime import datetime
-from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
-
-
-class EntryBase(BaseModel):
-    name: str = Field(..., min_length=1, max_length=200)
-    description: str = Field(default="", max_length=2000)
-    tags: list[str] = Field(default_factory=list)
-
-
-class EntryCreate(EntryBase):
-    pass
-
-
-class EntryUpdate(BaseModel):
-    name: str | None = Field(default=None, min_length=1, max_length=200)
-    description: str | None = Field(default=None, max_length=2000)
-    tags: list[str] | None = None
-
-
-class Entry(EntryBase):
-    id: UUID = Field(default_factory=uuid4)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class DomainBase(BaseModel):

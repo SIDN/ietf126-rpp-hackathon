@@ -1,4 +1,4 @@
-"""In-memory data store for registry entries and domains.
+"""In-memory data store for registry domains.
 
 This is intentionally simple (no database) so the hackathon project can run
 without any external services. Swap this out for a real persistence layer
@@ -8,23 +8,10 @@ later if needed.
 import secrets
 from datetime import datetime
 from threading import Lock
-from uuid import UUID
 
 from pydantic import BaseModel
 
-from app.models import (
-    Domain,
-    DomainAuthInfo,
-    DomainCreate,
-    Entry,
-    EntryCreate,
-    EntryUpdate,
-    Registrar,
-)
-
-
-class EntryNotFoundError(Exception):
-    pass
+from app.models import Domain, DomainAuthInfo, DomainCreate, Registrar
 
 
 class DomainNotFoundError(Exception):
@@ -45,52 +32,6 @@ class SameRegistrarError(Exception):
     """Raised when a transfer targets the domain's current registrar."""
 
     pass
-
-
-class EntryStore:
-    def __init__(self) -> None:
-        self._entries: dict[UUID, Entry] = {}
-        self._lock = Lock()
-
-    def list(self) -> list[Entry]:
-        with self._lock:
-            return list(self._entries.values())
-
-    def get(self, entry_id: UUID) -> Entry:
-        with self._lock:
-            entry = self._entries.get(entry_id)
-        if entry is None:
-            raise EntryNotFoundError(entry_id)
-        return entry
-
-    def create(self, payload: EntryCreate) -> Entry:
-        entry = Entry(**payload.model_dump())
-        with self._lock:
-            self._entries[entry.id] = entry
-        return entry
-
-    def update(self, entry_id: UUID, payload: EntryUpdate) -> Entry:
-        with self._lock:
-            entry = self._entries.get(entry_id)
-            if entry is None:
-                raise EntryNotFoundError(entry_id)
-            updated = entry.model_copy(
-                update={
-                    **payload.model_dump(exclude_unset=True),
-                    "updated_at": datetime.utcnow(),
-                }
-            )
-            self._entries[entry_id] = updated
-        return updated
-
-    def delete(self, entry_id: UUID) -> None:
-        with self._lock:
-            if entry_id not in self._entries:
-                raise EntryNotFoundError(entry_id)
-            del self._entries[entry_id]
-
-
-store = EntryStore()
 
 
 def _generate_transfer_token() -> str:

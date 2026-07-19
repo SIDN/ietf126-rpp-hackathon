@@ -139,6 +139,32 @@
   margin: 0;
 }
 
+.copyable-domain {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 6px;
+  padding: 0.1rem 0.35rem;
+  margin-left: -0.35rem;
+  transition: background-color 0.15s ease;
+}
+
+.copyable-domain:hover,
+.copyable-domain:focus-visible {
+  background: rgba(13, 148, 136, 0.12);
+  outline: none;
+}
+
+.copied-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #0d9488;
+  background: rgba(13, 148, 136, 0.15);
+  border-radius: 999px;
+  padding: 0.1rem 0.55rem;
+}
+
 .entry-card p {
   margin: 0.35rem 0 0;
   color: var(--muted, #666);
