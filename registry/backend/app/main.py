@@ -50,12 +50,12 @@ app.include_router(registrars_router, prefix=settings.api_prefix)
 def seed_demo_domains() -> None:
     """Seed a couple of demo domains so the transfer flow can be tried out."""
     demo_domains = [
-        DomainCreate(name="coyote1.example", registrar="Registrar A"),
-        DomainCreate(name="coyote2.example", registrar="Registrar A"),
-        DomainCreate(name="coyote3.example", registrar="Registrar A"),
-        DomainCreate(name="roadrunner1.example", registrar="Registrar B"),
-        DomainCreate(name="roadrunner2.example", registrar="Registrar B"),
-        DomainCreate(name="roadrunner3.example", registrar="Registrar B"),
+        DomainCreate(name="coyote1.example", registrar="Registrar A", registrant="user1"),
+        DomainCreate(name="coyote2.example", registrar="Registrar A", registrant="user1"),
+        DomainCreate(name="coyote3.example", registrar="Registrar A", registrant="user1"),
+        DomainCreate(name="roadrunner1.example", registrar="Registrar B", registrant="user2"),
+        DomainCreate(name="roadrunner2.example", registrar="Registrar B", registrant="user2"),
+        DomainCreate(name="roadrunner3.example", registrar="Registrar B", registrant="user2"),
     ]
     for domain in demo_domains:
         try:

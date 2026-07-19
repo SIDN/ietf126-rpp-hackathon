@@ -1,13 +1,11 @@
 """API routes for the registrar portal."""
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 
 from app import registry_client
-from app.auth import require_login
 from app.core.config import settings
-from app.models import Domain, DomainAuthInfo, TransferRequest
-from app.sessions import Session
+from app.models import Domain, DomainAuthInfo
 
 router = APIRouter(tags=["registrar"])
 
@@ -55,25 +53,3 @@ async def get_domain_transfer_token(name: str) -> DomainAuthInfo:
         raise HTTPException(status_code=exc.status_code, detail=exc.detail)
     except httpx.RequestError as exc:
         raise HTTPException(status_code=502, detail=f"Registry unreachable: {exc}")
-
-
-@router.post("/transfers", response_model=Domain)
-async def start_transfer(
-    payload: TransferRequest,
-    session: Session = Depends(require_login),
-) -> Domain:
-    """Pull `payload.domain_name` to this registrar using the transfer
-    token supplied by the domain's current (losing) registrar.
-
-    Requires an active login session - the caller must have signed in via
-    the OIDC provider before a transfer is allowed.
-    """
-    try:
-        domain = await registry_client.transfer_domain(
-            payload.domain_name, settings.registrar_name, payload.transfer_token
-        )
-    except registry_client.RegistryClientError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.detail)
-    except httpx.RequestError as exc:
-        raise HTTPException(status_code=502, detail=f"Registry unreachable: {exc}")
-    return domain

@@ -10,6 +10,7 @@ function App() {
 
   const [name, setName] = useState("");
   const [registrar, setRegistrar] = useState("");
+  const [registrant, setRegistrant] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -31,14 +32,19 @@ function App() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!name.trim() || !registrar.trim()) return;
+    if (!name.trim() || !registrar.trim() || !registrant.trim()) return;
 
     setSubmitting(true);
     setFormError(null);
     try {
-      await api.createDomain({ name: name.trim(), registrar: registrar.trim() });
+      await api.createDomain({
+        name: name.trim(),
+        registrar: registrar.trim(),
+        registrant: registrant.trim(),
+      });
       setName("");
       setRegistrar("");
+      setRegistrant("");
       await loadDomains();
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Failed to add domain");
@@ -79,6 +85,15 @@ function App() {
               required
             />
 
+            <label htmlFor="registrant">Registrant</label>
+            <input
+              id="registrant"
+              value={registrant}
+              onChange={(event) => setRegistrant(event.target.value)}
+              placeholder="e.g. jane.doe"
+              required
+            />
+
             <button type="submit" disabled={submitting}>
               {submitting ? "Adding..." : "Register"}
             </button>
@@ -106,6 +121,7 @@ function App() {
                 <tr>
                   <th>Domain name</th>
                   <th>Registrar</th>
+                  <th>Registrant</th>
                   <th>Last updated</th>
                 </tr>
               </thead>
@@ -114,6 +130,7 @@ function App() {
                   <tr key={domain.name}>
                     <td>{domain.name}</td>
                     <td>{domain.registrar}</td>
+                    <td>{domain.registrant}</td>
                     <td>{new Date(domain.updated_at).toLocaleString()}</td>
                   </tr>
                 ))}

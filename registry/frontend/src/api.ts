@@ -1,6 +1,7 @@
 export interface Domain {
   name: string;
   registrar: string;
+  registrant: string;
   created_at: string;
   updated_at: string;
 }
@@ -8,6 +9,7 @@ export interface Domain {
 export interface DomainInput {
   name: string;
   registrar: string;
+  registrant: string;
 }
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";

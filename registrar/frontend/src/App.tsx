@@ -213,7 +213,8 @@ function App() {
 
           {!authLoading && !session.authenticated ? (
             <p className="empty">
-              Sign in with your OAuth2 account to start a transfer.
+              <br />
+              Sign in to your account to start a transfer.
             </p>
           ) : (
             <form className="entry-form" onSubmit={handlePullSubmit}>
@@ -249,11 +250,6 @@ function App() {
               Refresh
             </button>
           </div>
-          <p className="panel-subtitle">
-            Domains sponsored by {registrarName ?? "this registrar"}. Reveal a
-            domain's transfer token to share it with whoever wants to pull it
-            away.
-          </p>
 
           {error && <p className="error">{error}</p>}
           {revealError && <p className="error">{revealError}</p>}
@@ -296,7 +292,6 @@ function App() {
                         : "Reveal token"}
                     </button>
                   </div>
-                  <p>Sponsoring registrar: {domain.registrar}</p>
                   <p className="muted-small">
                     Updated {new Date(domain.updated_at).toLocaleString()}
                   </p>

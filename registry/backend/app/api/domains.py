@@ -128,7 +128,7 @@ def transfer_domain(
 
     try:
         return domain_store.transfer(
-            name, payload.gaining_registrar, payload.transfer_token
+            name, payload.gaining_registrar, payload.transfer_token, payload.registrant
         )
     except DomainNotFoundError:
         raise HTTPException(status_code=404, detail="Domain not found")

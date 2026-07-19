@@ -77,6 +77,17 @@ def _is_logged_in(request: Request) -> bool:
     return bool(session_id and session_store.get(session_id) is not None)
 
 
+def _current_registrant(request: Request) -> str | None:
+    """The logged-in user's username, which becomes a domain's registrant
+    when they complete a transfer. Falls back to email/subject if the
+    OIDC provider didn't supply a username."""
+    session_id = request.cookies.get(settings.session_cookie_name)
+    session = session_store.get(session_id) if session_id else None
+    if session is None:
+        return None
+    return session.username or session.email or session.subject
+
+
 def _redirect_to_login(request: Request) -> RedirectResponse:
     """Send an unauthenticated browser through the OAuth2 login flow, then
     back to the same URL (path + query) it was trying to reach."""
@@ -244,6 +255,7 @@ async def transfer_decision(
 
 @router.get("/complete")
 async def complete_transfer(
+    request: Request,
     state: str = Query(...),
     transfer_assertion: str | None = Query(default=None),
     transfer_token: str | None = Query(default=None),
@@ -264,11 +276,15 @@ async def complete_transfer(
         message = error or "Transfer was not authorized by the losing registrar"
         return RedirectResponse(_frontend_redirect(error=message))
 
+    registrant = _current_registrant(request)
+    if not registrant:
+        return RedirectResponse(_frontend_redirect(error="Login required to complete a transfer"))
+
     transfer_assertion_b64 = base64.urlsafe_b64encode(transfer_assertion.encode()).decode()
 
     try:
         await registry_client.transfer_domain(
-            domain, settings.registrar_name, transfer_token, transfer_assertion_b64
+            domain, settings.registrar_name, transfer_token, transfer_assertion_b64, registrant
         )
     except registry_client.RegistryClientError as exc:
         return RedirectResponse(_frontend_redirect(error=exc.detail))

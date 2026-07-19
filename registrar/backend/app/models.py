@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class Domain(BaseModel):
@@ -10,6 +10,7 @@ class Domain(BaseModel):
 
     name: str
     registrar: str
+    registrant: str
     created_at: datetime
     updated_at: datetime
 
@@ -19,11 +20,3 @@ class DomainAuthInfo(BaseModel):
 
     name: str
     transfer_token: str
-
-
-class TransferRequest(BaseModel):
-    """A pull transfer request: pull `domain_name` to this registrar using
-    the transfer token provided by the domain's current sponsor."""
-
-    domain_name: str = Field(..., min_length=1, max_length=253)
-    transfer_token: str = Field(..., min_length=1)

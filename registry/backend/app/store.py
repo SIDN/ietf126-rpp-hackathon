@@ -47,6 +47,7 @@ class _DomainRecord(BaseModel):
 
     name: str
     registrar: str
+    registrant: str
     transfer_token: str
     created_at: datetime
     updated_at: datetime
@@ -55,6 +56,7 @@ class _DomainRecord(BaseModel):
         return Domain(
             name=self.name,
             registrar=self.registrar,
+            registrant=self.registrant,
             created_at=self.created_at,
             updated_at=self.updated_at,
         )
@@ -110,6 +112,7 @@ class DomainStore:
             record = _DomainRecord(
                 name=payload.name,
                 registrar=payload.registrar,
+                registrant=payload.registrant,
                 transfer_token=_generate_transfer_token(),
                 created_at=now,
                 updated_at=now,
@@ -117,7 +120,9 @@ class DomainStore:
             self._domains[key] = record
         return record.to_public()
 
-    def transfer(self, name: str, gaining_registrar: str, transfer_token: str) -> Domain:
+    def transfer(
+        self, name: str, gaining_registrar: str, transfer_token: str, new_registrant: str
+    ) -> Domain:
         key = self._key(name)
         with self._lock:
             record = self._domains.get(key)
@@ -130,6 +135,7 @@ class DomainStore:
             updated = record.model_copy(
                 update={
                     "registrar": gaining_registrar,
+                    "registrant": new_registrant,
                     # Rotate the token so the old one can't be reused for
                     # another transfer once this one has completed.
                     "transfer_token": _generate_transfer_token(),

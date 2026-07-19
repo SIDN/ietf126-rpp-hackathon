@@ -8,6 +8,9 @@ from pydantic import BaseModel, Field
 class DomainBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=253)
     registrar: str = Field(..., min_length=1, max_length=200)
+    registrant: str = Field(
+        ..., min_length=1, max_length=200, description="Username of the domain's current registrant"
+    )
 
 
 class DomainCreate(DomainBase):
@@ -43,6 +46,12 @@ class DomainTransferRequest(BaseModel):
 
     gaining_registrar: str = Field(..., min_length=1, max_length=200)
     transfer_token: str = Field(..., min_length=1)
+    registrant: str = Field(
+        ...,
+        min_length=1,
+        max_length=200,
+        description="Username of the new registrant (the logged-in user completing the transfer)",
+    )
 
 
 class Registrar(BaseModel):

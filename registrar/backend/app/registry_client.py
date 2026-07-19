@@ -55,11 +55,14 @@ async def transfer_domain(
     gaining_registrar: str,
     transfer_token: str,
     transfer_assertion: str,
+    registrant: str,
 ) -> dict:
     """Complete a pull transfer. `transfer_assertion` is the base64url-
     encoded, RS256-signed JWT the losing registrar returned, proving it
     authorized this exact operation/domain - the registry verifies it
-    against that registrar's registered public key."""
+    against that registrar's registered public key. `registrant` is the
+    username of the logged-in user completing the transfer, who becomes
+    the domain's new registrant."""
     async with new_client(base_url=settings.registry_api_url) as client:
         response = await client.post(
             f"/domains/{domain_name}/transfer",
@@ -67,6 +70,7 @@ async def transfer_domain(
             json={
                 "gaining_registrar": gaining_registrar,
                 "transfer_token": transfer_token,
+                "registrant": registrant,
             },
         )
     _raise_for_error(response)
